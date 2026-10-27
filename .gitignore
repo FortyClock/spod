@@ -1,0 +1,50 @@
+# Локальные настройки редакторов и инструментов
+.vscode/
+.idea/
+.agents/
+.codex/
+.aws/
+*.swp
+*.swo
+*~
+
+# Служебные файлы ОС
+.DS_Store
+Thumbs.db
+
+# Результаты компиляции C/C++ и MPI
+*.o
+*.obj
+*.a
+*.so
+*.out
+*.exe
+/pr1/src/task1_unordered
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+compile_commands.json
+
+# Временные файлы LaTeX (исходники .tex и готовые .pdf сохраняем)
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.nav
+*.run.xml
+*.snm
+*.synctex.gz
+*.toc
+*.vrb
+*.xdv
+
+# Аварийные дампы программ
+core
+core.*
+vgcore.*
