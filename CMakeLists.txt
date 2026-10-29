@@ -11,23 +11,28 @@ find_package(MPI REQUIRED COMPONENTS C)
 add_executable(task1_unordered pr1/src/task1_unordered.c)
 add_executable(task1_benchmark pr1/src/task1_benchmark.c)
 add_executable(task2_ordered pr1/src/task2_ordered.c)
+add_executable(task2_benchmark pr1/src/task2_benchmark.c)
 
 target_compile_features(task1_unordered PRIVATE c_std_11)
 target_compile_features(task1_benchmark PRIVATE c_std_11)
 target_compile_features(task2_ordered PRIVATE c_std_11)
+target_compile_features(task2_benchmark PRIVATE c_std_11)
 
 target_link_libraries(task1_unordered PRIVATE MPI::MPI_C)
 target_link_libraries(task1_benchmark PRIVATE MPI::MPI_C)
 target_link_libraries(task2_ordered PRIVATE MPI::MPI_C)
+target_link_libraries(task2_benchmark PRIVATE MPI::MPI_C)
 
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(task1_unordered PRIVATE -Wall -Wextra -Wpedantic)
     target_compile_options(task1_benchmark PRIVATE -Wall -Wextra -Wpedantic)
     target_compile_options(task2_ordered PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(task2_benchmark PRIVATE -Wall -Wextra -Wpedantic)
 elseif(MSVC)
     target_compile_options(task1_unordered PRIVATE /W4)
     target_compile_options(task1_benchmark PRIVATE /W4)
     target_compile_options(task2_ordered PRIVATE /W4)
+    target_compile_options(task2_benchmark PRIVATE /W4)
 endif()
 
 # The list is configurable because the useful process counts depend on the
