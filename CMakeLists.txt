@@ -6,19 +6,33 @@ find_package(MPI REQUIRED COMPONENTS C)
 
 add_executable(task1_unordered pr1/src/task1_unordered.c)
 add_executable(task2_ordered pr1/src/task2_ordered.c)
+add_executable(task1_unordered_benchmark EXCLUDE_FROM_ALL
+    pr1/src/task1_unordered_benchmark.c)
+add_executable(task2_ordered_benchmark EXCLUDE_FROM_ALL
+    pr1/src/task2_ordered_benchmark.c)
 
 target_compile_features(task1_unordered PRIVATE c_std_11)
 target_compile_features(task2_ordered PRIVATE c_std_11)
+target_compile_features(task1_unordered_benchmark PRIVATE c_std_11)
+target_compile_features(task2_ordered_benchmark PRIVATE c_std_11)
 
 target_link_libraries(task1_unordered PRIVATE MPI::MPI_C)
 target_link_libraries(task2_ordered PRIVATE MPI::MPI_C)
+target_link_libraries(task1_unordered_benchmark PRIVATE MPI::MPI_C)
+target_link_libraries(task2_ordered_benchmark PRIVATE MPI::MPI_C)
 
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(task1_unordered PRIVATE -Wall -Wextra -Wpedantic)
     target_compile_options(task2_ordered PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(task1_unordered_benchmark PRIVATE
+        -Wall -Wextra -Wpedantic)
+    target_compile_options(task2_ordered_benchmark PRIVATE
+        -Wall -Wextra -Wpedantic)
 elseif(MSVC)
     target_compile_options(task1_unordered PRIVATE /W4)
     target_compile_options(task2_ordered PRIVATE /W4)
+    target_compile_options(task1_unordered_benchmark PRIVATE /W4)
+    target_compile_options(task2_ordered_benchmark PRIVATE /W4)
 endif()
 
 # The list is configurable because the useful process counts depend on the
@@ -26,14 +40,19 @@ endif()
 set(SPOD_PROCESS_COUNTS "1;2;4;8" CACHE STRING
     "Process counts used by MPI run targets and CTest")
 
-# Open MPI counts physical cores as slots by default. This flag makes the
-# hardware threads available as slots as well (12 slots on a 6-core/12-thread
-# processor). Additional flags can be supplied as a semicolon-separated list.
+# Open MPI counts physical cores as slots by default. This flag also makes
+# the available hardware threads usable as slots. Additional flags can be
+# supplied as a semicolon-separated list.
 set(SPOD_MPIEXEC_PREFLAGS "--use-hwthread-cpus" CACHE STRING
     "Additional flags passed to the MPI launcher")
 
+set(SPOD_BENCHMARK_MESSAGE_SIZE "1024" CACHE STRING
+    "Number of integers sent by each process in benchmark runs")
+
 set(_spod_task1_run_targets)
 set(_spod_task2_run_targets)
+set(_spod_task1_benchmark_run_targets)
+set(_spod_task2_benchmark_run_targets)
 foreach(process_count IN LISTS SPOD_PROCESS_COUNTS)
     if(NOT process_count MATCHES "^[1-9][0-9]*$")
         message(FATAL_ERROR
@@ -71,10 +90,48 @@ foreach(process_count IN LISTS SPOD_PROCESS_COUNTS)
         COMMENT "Running task 2 with ${process_count} MPI processes"
     )
     list(APPEND _spod_task2_run_targets ${run_target})
+
+    set(run_target "run_task1_benchmark_p${process_count}")
+    add_custom_target(${run_target}
+        COMMAND
+            ${MPIEXEC_EXECUTABLE}
+            ${MPIEXEC_NUMPROC_FLAG} ${process_count}
+            ${MPIEXEC_PREFLAGS}
+            ${SPOD_MPIEXEC_PREFLAGS}
+            $<TARGET_FILE:task1_unordered_benchmark>
+            ${MPIEXEC_POSTFLAGS}
+            ${SPOD_BENCHMARK_MESSAGE_SIZE}
+        DEPENDS task1_unordered_benchmark
+        USES_TERMINAL
+        VERBATIM
+        COMMENT "Running task 1 benchmark with ${process_count} MPI processes"
+    )
+    list(APPEND _spod_task1_benchmark_run_targets ${run_target})
+
+    set(run_target "run_task2_benchmark_p${process_count}")
+    add_custom_target(${run_target}
+        COMMAND
+            ${MPIEXEC_EXECUTABLE}
+            ${MPIEXEC_NUMPROC_FLAG} ${process_count}
+            ${MPIEXEC_PREFLAGS}
+            ${SPOD_MPIEXEC_PREFLAGS}
+            $<TARGET_FILE:task2_ordered_benchmark>
+            ${MPIEXEC_POSTFLAGS}
+            ${SPOD_BENCHMARK_MESSAGE_SIZE}
+        DEPENDS task2_ordered_benchmark
+        USES_TERMINAL
+        VERBATIM
+        COMMENT "Running task 2 benchmark with ${process_count} MPI processes"
+    )
+    list(APPEND _spod_task2_benchmark_run_targets ${run_target})
 endforeach()
 
 add_custom_target(run_task1_all DEPENDS ${_spod_task1_run_targets})
 add_custom_target(run_task2_all DEPENDS ${_spod_task2_run_targets})
+add_custom_target(run_task1_benchmark_all
+    DEPENDS ${_spod_task1_benchmark_run_targets})
+add_custom_target(run_task2_benchmark_all
+    DEPENDS ${_spod_task2_benchmark_run_targets})
 
 include(CTest)
 if(BUILD_TESTING)
