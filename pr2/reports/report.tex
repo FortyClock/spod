@@ -1,0 +1,250 @@
+% !TeX program = xelatex
+% Сборка: xelatex report.tex
+% Персональные данные для титульного листа изменяются в этом блоке.
+\documentclass[14pt,a4paper]{extarticle}
+
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{fontspec}
+\IfFontExistsTF{Times New Roman}
+    {
+        \setmainfont{Times New Roman}
+        \setsansfont{Times New Roman}
+        \setmonofont{Times New Roman}
+        \newfontfamily\cyrillicfont{Times New Roman}
+        \newfontfamily\cyrillicfontsf{Times New Roman}
+        \newfontfamily\cyrillicfonttt{Times New Roman}
+    }
+    {
+        \setmainfont{Liberation Serif}
+        \setsansfont{Liberation Serif}
+        \setmonofont{Liberation Serif}
+        \newfontfamily\cyrillicfont{Liberation Serif}
+        \newfontfamily\cyrillicfontsf{Liberation Serif}
+        \newfontfamily\cyrillicfonttt{Liberation Serif}
+        \PackageWarningNoLine{report}{Times New Roman is not installed;
+        using Liberation Serif temporarily}
+    }
+\usepackage{unicode-math}
+\setmathfont{texgyretermes-math.otf}
+\usepackage{polyglossia}
+\setdefaultlanguage{russian}
+\usepackage[left=30mm,right=15mm,top=20mm,bottom=20mm]{geometry}
+\usepackage{setspace}
+\usepackage{indentfirst}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[section]{placeins}
+\usepackage{tabularx}
+\usepackage[hidelinks]{hyperref}
+
+\lstset{
+    language=C,
+    basicstyle=\rmfamily\normalsize,
+    breaklines=true,
+    columns=fullflexible,
+    keepspaces=true,
+    showstringspaces=false
+}
+
+\newcommand{\Ministry}{МИНОБРНАУКИ РОССИИ}
+\newcommand{\University}{Санкт-Петербургский государственный\\
+электротехнический университет\\
+«ЛЭТИ» им. В.И. Ульянова (Ленина)}
+\newcommand{\Department}{МОЭВМ}
+\newcommand{\StudentName}{Пархоменко М.~С.}
+\newcommand{\StudentGroup}{2304}
+\newcommand{\TeacherName}{Татаринов Ю.~С.}
+\newcommand{\City}{Санкт-Петербург}
+
+\setstretch{1.5}
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0pt}
+\setlength{\emergencystretch}{3em}
+\titleformat{\section}{\normalfont\bfseries\centering}{\thesection}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.5em}{1em}
+\titleformat{\subsection}{\normalfont\bfseries}{\thesubsection.}{0.5em}{}
+\setlist{nosep,leftmargin=1.25cm}
+\captionsetup{
+    font=normalsize,
+    labelsep=endash,
+    skip=6pt
+}
+\captionsetup[figure]{
+    name=Рисунок,
+    justification=centering,
+    singlelinecheck=false
+}
+\captionsetup[table]{
+    name=Таблица,
+    position=top,
+    justification=raggedright,
+    singlelinecheck=false
+}
+\newcommand{\sectionbreak}{\clearpage}
+
+\begin{document}
+
+\begin{titlepage}
+    \thispagestyle{empty}
+    \begin{center}
+        \Ministry
+
+        \University
+
+        Кафедра \Department
+    \end{center}
+
+    \vspace{2cm}
+
+    \begin{center}
+        \textbf{ОТЧЕТ}
+
+        по практической работе №~2
+
+        по дисциплине «Системы параллельной обработки данных»
+
+        \vspace{0.5cm}
+        Тема: «Пляжный волейбол»
+    \end{center}
+
+    \vspace{2cm}
+
+    \begin{flushright}
+        \begin{minipage}{0.8\textwidth}
+            \begin{tabularx}{\linewidth}{@{}p{4.8cm}
+                >{\centering\arraybackslash}p{2.8cm} X@{}}
+                Студент гр. \StudentGroup
+                & \rule{2.5cm}{0.4pt} & \StudentName\\
+                & подпись & \\[0.8cm]
+                Преподаватель
+                & \rule{2.5cm}{0.4pt} & \TeacherName\\
+                & подпись &
+            \end{tabularx}
+        \end{minipage}
+    \end{flushright}
+
+    \vfill
+
+    \begin{center}
+        \City\\
+        2026
+    \end{center}
+\end{titlepage}
+
+\setcounter{page}{2}
+
+\section{Цель работы}
+
+Изучить обмен сообщениями средствами MPI, реализовать случайный выбор
+процесса-адресата и исследовать работу параллельной программы при различном
+числе процессов и различном размере сообщения.
+
+\section{Формулировка задания}
+
+\textbf{Вариант 13. Пляжный волейбол.} Процесс 0 генерирует сообщение и
+посылает его любому другому процессу группы. Процесс-приёмник передаёт
+сообщение дальше. Выбор процесса-адресата осуществляется случайным образом.
+
+\section{Описание алгоритма}
+
+В программе участвуют $p$ MPI-процессов с рангами от 0 до $p-1$,
+причём для выполнения обмена необходимо $p\geq 2$. После инициализации MPI
+процесс 0 формирует исходное сообщение и случайным образом выбирает первый
+процесс-получатель среди процессов с рангами от 1 до $p-1$. Остальные
+процессы ожидают поступления сообщения.
+
+Получив сообщение, процесс определяет ранг следующего адресата. Адресат
+выбирается из всех процессов группы, кроме самого отправителя, поэтому
+сообщение не может быть немедленно послано процессом самому себе. Затем
+полученное сообщение передаётся выбранному процессу, который повторяет те же
+действия. Таким образом, в каждый момент обмена один процесс владеет
+сообщением, а последовательность его перемещений между процессами заранее не
+определена.
+
+В качестве сообщения используется целое число, обозначающее номер передачи.
+Процесс 0 начинает обмен со значения 1. Каждый следующий получатель
+увеличивает число на единицу перед дальнейшей отправкой. В текущей версии
+игра ограничена десятью передачами.
+
+Обычное сообщение передаётся с тегом \texttt{TAG\_BALL}. После получения
+сообщения с номером 10 процесс не передаёт мяч дальше, а рассылает всем
+остальным процессам управляющее сообщение с тегом \texttt{TAG\_STOP}.
+Получив этот тег, процесс выходит из цикла приёма. Такой протокол позволяет
+завершить не только последний процесс-получатель, но и процессы, ожидающие
+сообщение в \texttt{MPI\_Recv}.
+
+Случайный адресат выбирается повторной генерацией числа в диапазоне
+$[0,p-1]$ до тех пор, пока полученный ранг не будет отличаться от ранга
+отправителя. Генератор псевдослучайных чисел каждого процесса получает
+начальное значение, зависящее от текущего времени и ранга процесса.
+
+\section{Реализация и функциональная проверка}
+
+Программа реализована на языке C с использованием MPI. Полный листинг
+текущей версии приведён в приложении А. Для сборки в конфигурацию CMake
+добавлена цель \texttt{volleyball}. Используется стандарт C11, библиотека
+\texttt{MPI::MPI\_C} и предупреждения компилятора \texttt{-Wall},
+\texttt{-Wextra}, \texttt{-Wpedantic}. Сборка выполнена без предупреждений.
+
+После начальной отправки все процессы, включая процесс 0, входят в общий
+цикл приёма. Вызов \texttt{MPI\_Recv} использует
+\texttt{MPI\_ANY\_SOURCE} и \texttt{MPI\_ANY\_TAG}. Фактический отправитель
+и тег определяются по структуре \texttt{MPI\_Status}. Различение обычных и
+управляющих сообщений выполняется по тегам \texttt{TAG\_BALL} и
+\texttt{TAG\_STOP}.
+
+Для функциональной проверки выполнены запуски на двух, четырёх и восьми
+процессах. Во всех случаях программа выполнила передачи с номерами от 1 до
+10, не выбирала текущий процесс в качестве адресата и завершилась с нулевым
+кодом возврата. Результаты приведены в таблице~\ref{tab:functional-check}.
+
+\begin{table}[H]
+\caption{Результаты функциональной проверки}
+\label{tab:functional-check}
+\centering
+\begin{tabular}{c|c|c|c}
+Число процессов & Число передач & Сообщений остановки & Результат \\
+\hline
+2 & 10 & 1 & Успешно \\
+4 & 10 & 3 & Успешно \\
+8 & 10 & 7 & Успешно
+\end{tabular}
+\end{table}
+
+В одном из запусков на восьми процессах получена последовательность
+адресатов
+\[
+0\to7\to5\to2\to3\to0\to3\to7\to4\to2\to4.
+\]
+Она содержит десять передач, причём соседние ранги различаются. При
+повторном запуске последовательность может измениться. Строки диагностического
+вывода разных процессов также могут отображаться не в порядке номеров
+передач, поскольку MPI не задаёт общий порядок вывода в стандартный поток.
+
+% План продолжения отчёта после реализации программы:
+%
+% \section{Формальное описание с помощью сетей Петри}
+% Добавить места, переходы, начальную маркировку и функционал переходов после
+% окончательного выбора протокола завершения.
+%
+% \section{Экспериментальное исследование}
+% Описать методику замеров без формирования данных и вывода; добавить таблицы
+% для p = 1, 2, 4, 8, 16 и нескольких размеров сообщения, а затем построить
+% графики времени и, если применимо, ускорения.
+%
+% \section{Выводы}
+% Сформулировать выводы только после получения результатов измерений.
+%
+% \section{Список использованных источников}
+% Источники перечисляются в порядке первого упоминания в тексте.
+
+\clearpage
+\phantomsection
+\section*{ПРИЛОЖЕНИЕ А\\Листинг программы «Пляжный волейбол»}
+\lstinputlisting{../src/volleyball.c}
+
+\end{document}
