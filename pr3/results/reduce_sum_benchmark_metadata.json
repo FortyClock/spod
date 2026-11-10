@@ -1,0 +1,40 @@
+{
+  "started_utc": "2026-11-10T10:17:01.494247+00:00",
+  "status": "complete",
+  "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.39",
+  "logical_cpus": 8,
+  "cpu_model": "12th Gen Intel(R) Core(TM) i3-12100",
+  "binary": "/home/mark/Документы/mark/spod/build/reduce_sum_benchmark",
+  "binary_sha256": "554004a09273e4e34f343531e323c6dc8c77968c69068f924e5b74f1d0698916",
+  "source_sha256": "ffbce80b836db0c10d89ed601707584b69557c32f0d5aba1b434cda8bcef3509",
+  "launcher_version": "mpirun (Open MPI) 4.1.6\n\nReport bugs to http://www.open-mpi.org/community/help/",
+  "launcher_flags": [
+    "--use-hwthread-cpus",
+    "--oversubscribe"
+  ],
+  "processes": [
+    1,
+    2,
+    4,
+    8,
+    16
+  ],
+  "repetitions": 7,
+  "warmups": 0,
+  "iterations_per_run": 1000,
+  "array_length_rule": "processes + 5",
+  "timing": "maximum local series duration / iterations; each repeat starts a new MPI job",
+  "commands": [
+    "mpirun --use-hwthread-cpus --oversubscribe -np 1 '/home/mark/Документы/mark/spod/build/reduce_sum_benchmark'",
+    "mpirun --use-hwthread-cpus --oversubscribe -np 2 '/home/mark/Документы/mark/spod/build/reduce_sum_benchmark'",
+    "mpirun --use-hwthread-cpus --oversubscribe -np 4 '/home/mark/Документы/mark/spod/build/reduce_sum_benchmark'",
+    "mpirun --use-hwthread-cpus --oversubscribe -np 8 '/home/mark/Документы/mark/spod/build/reduce_sum_benchmark'",
+    "mpirun --use-hwthread-cpus --oversubscribe -np 16 '/home/mark/Документы/mark/spod/build/reduce_sum_benchmark'"
+  ],
+  "CMAKE_BUILD_TYPE": "Release",
+  "CMAKE_C_COMPILER": "/usr/bin/gcc",
+  "CMAKE_C_FLAGS": "",
+  "CMAKE_C_FLAGS_RELEASE": "-O3 -DNDEBUG",
+  "compiler_version": "gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+  "finished_utc": "2026-11-10T10:17:18.352915+00:00"
+}
